@@ -1,10 +1,12 @@
-// let label = '';
+let label = '';
 
-// let fabric = [];
-// let metal = [];
-// let paper = [];
-// let plastic = [];
-// let wood = [];
+let fabric = [];
+for (let i = 0; i < )
+
+let metal = [];
+let paper = [];
+let plastic = [];
+let wood = [];
 
 // const IMAGE_WIDTH = 64;
 // const IMAGE_HEIGHT = 64;
@@ -15,9 +17,11 @@
 //   outputs: ['label']
 // }
 // const materialClassifier = ml5.neuralNetwork(options);
+let img;
 
 function setup() {
 createCanvas(640, 480)
+img = loadImage('Fabric/Fabric1.JPG');
 }
 
 // function addExample(label) {
@@ -32,5 +36,5 @@ createCanvas(640, 480)
 // }
 
 function draw(){
-image('file://Users/luyumeng/Desktop/ML4Artists/Fabric/Fabric1.JPG/', 0, 0)
+image(img, 0, 0)
 }
