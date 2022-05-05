@@ -1,7 +1,7 @@
 let label = '';
 
 let fabric = [];
-for (let i = 0; i < )
+// for (let i = 0; i < )
 
 let metal = [];
 let paper = [];
