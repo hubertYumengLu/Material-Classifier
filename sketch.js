@@ -4,6 +4,7 @@ let arrowY = 375;
 let imgSize = 400;
 let inputText = '';
 let result = '';
+let confidence = 0;
 
 let firstTrained = false;
 let introductionScene = true;
@@ -21,7 +22,7 @@ let nn = ml5.neuralNetwork(options);
 
 
 function setup() {
-    createCanvas(800, 800);
+    createCanvas(800, 400);
     
     // see https://p5js.org/reference/#/p5/createFileInput
     let fileInput = createFileInput(handleFile, true);
@@ -66,21 +67,13 @@ function handleFile(file) {
         console.log(file.name + ' is not an image, ignoring');
         return;
     }
-    
-    // console.log('Adding ' + file.name + '...');
+    console.log('Adding ' + file.name + '...');
   
     // turn it into an image
     
-    let oldImg = select('#uploaded');
-    if (oldImg) {
-        oldImg.remove();
-    }
     img = createImg(file.data, '');
-    img.id('uploaded');
     img.size(imgSize, imgSize);
-    img.position(400, 0);
-    //img.hide();
-    
+    img.hide();
     console.log(img)
     if (!firstTrained) {
         imageUploadedScene = true;
@@ -161,14 +154,28 @@ function categorised() {
 function testing() {
     classifyObject();
     background(255);
+    image(img, 400, 0);
     fill(0)
     textSize(20);
     textAlign(CENTER);
-    text('The object in this image is made of...', 200, 140);
+    text('It is ' + confidence * 100 + '% sure that', 200, 130);
+    text('the object in this image is made of...', 200, 150);
     fill(255, 0, 255);
     text(result, 200, 180);
     fill(0);
     text('Is it correct?', 200, 210)
+    if (((mouseX < 75 + 50) && (mouseX > 75)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+        fill(0, 200, 0);
+    } else {
+        fill(0);
+    }
+    text('YES', 100, 250);
+    if (((mouseX < 275 + 50) && (mouseX > 275)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+        fill(255, 0, 0);
+    } else {
+        fill(0);
+    }
+    text('NO', 300, 250);
 }
 
 function trained() {
@@ -195,6 +202,7 @@ function trained() {
 function mousePressed() {
     arrowY = 375;
     if (imageUploadedScene) {
+        // If mouse goes to "Done!" button
         if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
             if (inputText == '') {
                 error();
@@ -215,7 +223,26 @@ function mousePressed() {
         imageUploadedScene = false;
         categorisedScene = false;
         testingScene = false;
+    } else if (testingScene) {
+        // If mouse goes to "YES" button
+        if (((mouseX < 75 + 50) && (mouseX > 75)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+         
+            addExample(result);
+
+            nn.normalizeData();
+            nn.train({epochs: 50}, finishedTraining)
+        } 
+
+        // If mouse goes to "NO" button
+        if (((mouseX < 275 + 50) && (mouseX > 275)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+             
+            imageUploadedScene = true;
+            introductionScene = false;
+            categorisedScene = false;
+            testingScene = false;
+        } 
     }
+    
     
 }
 
@@ -257,7 +284,8 @@ function gotResults(error, results) {
       return;
     }
     result = results[0].label;
-    console.log(result)
+    confidence = results[0].confidence;
+    console.log(results)
   }
 
 function error() {
