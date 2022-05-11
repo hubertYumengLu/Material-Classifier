@@ -220,20 +220,11 @@ function mousePressed() {
     } else if (scene == 'categorised') {
         // If mouse goes to "Train!" button and the data array has at least 5 images
         if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30)) && (data.length >= 5)) {
-            // data.forEach(item => {
-            //     const inputs = {
-            //       image: item.image
-            //     };
-            //     const output = {
-            //       label: item.label
-            //     };
-              
-            //     nn.addData(inputs, output);
-            //   });
             for (let i = 0; i < data.length; i ++) {
                 nn.addData({image: data[i].image}, {label: data[i].target});
             }
             nn.normalizeData();
+            console.log('Training...')
             nn.train({epochs: 50}, finishedTraining)
         }
 
