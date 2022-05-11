@@ -1,4 +1,5 @@
 let img;
+let data = [];
 
 let arrowY = 375;
 let imgSize = 400;
@@ -7,11 +8,7 @@ let result = '';
 let confidence = 0;
 
 let firstTrained = false;
-let introductionScene = true;
-let imageUploadedScene = false;
-let categorisedScene = false;
-let testingScene = false;
-let inputError = false;
+let scene = 'introduction';
 
 let options = {
     inputs: [imgSize, imgSize, 4],
@@ -40,13 +37,13 @@ function setup() {
 }
   
 function draw() {
-      if (introductionScene) {
+      if (scene == 'introduction') {
           if (!firstTrained) {
             introduction();
           } else {
             trained();
           }
-      } else if (imageUploadedScene) {
+      } else if (scene == 'imageUploaded') {
         imageUploaded();
         if (inputError) {
             fill(255, 0, 0);
@@ -54,9 +51,9 @@ function draw() {
             textAlign(CENTER);
             text('ERROR: Material must be defined', 200, 350);
         }
-      } else if (categorisedScene) {
+      } else if (scene = 'categorised') {
         categorised();
-      } else if (testingScene) {
+      } else if (scene == 'testing') {
         testing();
       }
     
@@ -74,16 +71,12 @@ function handleFile(file) {
     img = createImg(file.data, '');
     img.size(imgSize, imgSize);
     img.hide();
-    console.log(img)
+    console.log(img);
     if (!firstTrained) {
-        imageUploadedScene = true;
-        testingScene = false;
+        scene = 'imageUploaded';
     } else {
-        testingScene = true;
+        scene = 'testing';
     }
-    introductionScene = false;
-    categorisedScene = false;
-    
 
     // you should be able to add img to the Neural Network
     // here, e.g.
@@ -101,7 +94,7 @@ function introduction() {
     text('This program is here to', 200, 100);
     text('help build a future project:', 200, 140);
     textSize(20);
-    text('A webcam-based material detecting', 200, 190);
+    text('A material detecting', 200, 190);
     text('neural network', 200, 220);
     textAlign(LEFT);
     textSize(15);
@@ -148,7 +141,15 @@ function categorised() {
     text('Thank you!', 200, 140);
     textSize(20);
     text('Keep uploading files until you have', 200, 180);
-    text('at least two categories.', 200, 210)
+    text('at least two categories.', 200, 210);
+    fill(150);
+    if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+        if (data.length >= 5) {
+            fill(241, 164, 68);
+        }
+    }
+    text('TRAIN!', 200, 250);
+    
 }
 
 function testing() {
@@ -201,45 +202,55 @@ function trained() {
 //Interactions
 function mousePressed() {
     arrowY = 375;
-    if (imageUploadedScene) {
+    if (scene == 'imageUploaded') {
         // If mouse goes to "Done!" button
         if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
             if (inputText == '') {
                 error();
             }
             else {
-            categorisedScene = true;
-            imageUploadedScene = false;
-            introductionScene = false;
-            testingScene = false;
+            scene = 'categorised';
             addExample(inputText);
-
-            nn.normalizeData();
-            nn.train({epochs: 50}, finishedTraining)
+            // console.log('Training...');
+            console.log(data);
+            // nn.normalizeData();
+            // nn.train({epochs: 50}, finishedTraining)
             }
         }
-    } else if (categorisedScene) {
-        introductionScene = true;
-        imageUploadedScene = false;
-        categorisedScene = false;
-        testingScene = false;
-    } else if (testingScene) {
+    } else if (scene == 'categorised') {
+        // If mouse goes to "Train!" button and the data array has at least 5 images
+        if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30)) && (data.length >= 5)) {
+            // data.forEach(item => {
+            //     const inputs = {
+            //       image: item.image
+            //     };
+            //     const output = {
+            //       label: item.label
+            //     };
+              
+            //     nn.addData(inputs, output);
+            //   });
+            for (let i = 0; i < data.length; i ++) {
+                nn.addData({image: data[i].image}, {label: data[i].target});
+            }
+            nn.normalizeData();
+            nn.train({epochs: 50}, finishedTraining)
+        }
+
+        scene = 'introduction';
+    } else if (scene == 'testing') {
         // If mouse goes to "YES" button
         if (((mouseX < 75 + 50) && (mouseX > 75)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
          
             addExample(result);
 
-            nn.normalizeData();
-            nn.train({epochs: 50}, finishedTraining)
+            // nn.normalizeData();
+            // nn.train({epochs: 50}, finishedTraining)
         } 
 
         // If mouse goes to "NO" button
         if (((mouseX < 275 + 50) && (mouseX > 275)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
-             
-            imageUploadedScene = true;
-            introductionScene = false;
-            categorisedScene = false;
-            testingScene = false;
+            scene = 'imageUploaded';
         } 
     }
     
@@ -254,12 +265,12 @@ function textInput(){
 function addExample(label) {
     let inputImage = {
       image: img,
+      target: label
     };
-    let target = {
-      label,
-    };
-    console.log('Adding example: ' + label);
-    nn.addData(inputImage, target);
+    // let target = {
+    //   label,
+    // };
+    data.push(inputImage);
 }
 
 function saveData() {
@@ -269,7 +280,7 @@ function saveData() {
 function finishedTraining() {
     firstTrained = true;
     console.log('Training complete!');
-    introductionScene = true;
+    scene = 'introduction';
 }
 
 function classifyObject() {
