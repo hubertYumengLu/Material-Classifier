@@ -57,11 +57,12 @@ function draw() {
         categorised();
     } else if (scene == 'testing') {
         testing();
+    } else if (scene == 'incorrect') {
+        incorrectResult();
     }
     if (data.find(item => item.target == "fabric") != undefined && data.find(item => item.target == "metal") != undefined && data.find(item => item.target == "paper") != undefined && data.find(item => item.target == "plastic") != undefined && data.find(item => item.target == "wood") != undefined) {
         trainable = true; 
     }
-    
 }
   
 function handleFile(file) {
@@ -213,6 +214,31 @@ function trained() {
     arrowY += sin(frameCount / 10);
 }
 
+function incorrectResult() {
+    background(255);
+    fill(0);
+    textSize(30);
+    textAlign(CENTER);
+    text('Oops!', 200, 100);
+    text('What is it made of then?', 200, 140);
+    textSize(20);
+    text('Please input below:', 200, 180)
+
+    if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
+        fill(0, 125, 255);
+    } else {
+        fill(0);
+    }
+    textSize(15);
+    text('Done!', 200, 260);
+    image(img, 400, 0);
+    strokeWeight(3);
+    line(240, arrowY - 180, 240, arrowY);
+    line(240, arrowY, 240 - 15, arrowY - 20);
+    line(240, arrowY, 240 + 15, arrowY - 20);
+    arrowY += sin(frameCount / 10);
+}
+
 //Interactions
 function mousePressed() {
     arrowY = 375;
@@ -226,7 +252,7 @@ function mousePressed() {
                 else {
                 scene = 'categorised';
                 addExample(inputText);
-                // console.log('Training...');
+                console.log('Adding example:' + inputText);
                 console.log(data);
                 // nn.normalizeData();
                 // nn.train({epochs: 50}, finishedTraining)
@@ -254,6 +280,8 @@ function mousePressed() {
         if (((mouseX < 75 + 50) && (mouseX > 75)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
             
             addExample(result);
+            console.log('Adding example:' + result);
+            console.log(data);
             scene = 'introduction';
             nn.normalizeData();
             nn.train({epochs: 50}, finishedTraining)
@@ -261,8 +289,24 @@ function mousePressed() {
 
         // If mouse goes to "NO" button
         if (((mouseX < 275 + 50) && (mouseX > 275)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
-            scene = 'imageUploaded';
+            scene = 'incorrect';
         } 
+    } else if (scene == 'incorrect') {
+        // If mouse goes to "Done!" button
+        if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
+            if (inputText == '') {
+                error();
+            }
+            else {
+                addExample(inputText);
+                console.log('Adding example:' + inputText);
+                console.log(data);
+                nn.normalizeData();
+                nn.train({epochs: 50}, finishedTraining)
+                scene = 'introduction';
+            }
+        }
+        
     }
     
     
