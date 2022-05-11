@@ -2,7 +2,7 @@ let img;
 let data = [];
 
 let arrowY = 375;
-let imgSize = 64;
+let imgSize = 80;
 let inputText = '';
 let result = '';
 let confidence = 0;
@@ -68,9 +68,16 @@ function handleFile(file) {
   
     // turn it into an image
     
-    img = createImg(file.data, 'Unavailable image. Please upload something else.');
+    let oldImg = select('#uploaded');
+    if (oldImg) {
+        oldImg.remove();
+    }
+
+    img = createImg(file.data, '');
+    img.id('uploaded');
     img.size(imgSize, imgSize);
-    img.hide();
+    img.position(400, 0);
+    //img.hide();
     console.log(img);
     if (!firstTrained) {
         scene = 'imageUploaded';
@@ -203,19 +210,25 @@ function trained() {
 function mousePressed() {
     arrowY = 375;
     if (scene == 'imageUploaded') {
-        // If mouse goes to "Done!" button
-        if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
-            if (inputText == '') {
-                error();
+        if (!firstTrained) {
+            // If mouse goes to "Done!" button
+            if (((mouseX < 200 + 30) && (mouseX > 200 - 30)) && ((mouseY > 245) && (mouseY < 280))) {
+                if (inputText == '') {
+                    error();
+                }
+                else {
+                scene = 'categorised';
+                addExample(inputText);
+                // console.log('Training...');
+                console.log(data);
+                // nn.normalizeData();
+                // nn.train({epochs: 50}, finishedTraining)
+                }
             }
-            else {
-            scene = 'categorised';
-            addExample(inputText);
-            // console.log('Training...');
-            console.log(data);
-            // nn.normalizeData();
-            // nn.train({epochs: 50}, finishedTraining)
-            }
+        } else {
+            nn.normalizeData();
+            nn.train({epochs: 50}, finishedTraining)
+            scene = 'introduction';
         }
     } else if (scene == 'categorised') {
         // If mouse goes to "Train!" button and the data array has at least 5 images
@@ -232,9 +245,9 @@ function mousePressed() {
     } else if (scene == 'testing') {
         // If mouse goes to "YES" button
         if (((mouseX < 75 + 50) && (mouseX > 75)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
-         
+            
             addExample(result);
-
+            scene = 'introduction';
             nn.normalizeData();
             nn.train({epochs: 50}, finishedTraining)
         } 
