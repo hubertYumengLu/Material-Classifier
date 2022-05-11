@@ -2,7 +2,7 @@ let img;
 let data = [];
 
 let arrowY = 375;
-let imgSize = 400;
+let imgSize = 64;
 let inputText = '';
 let result = '';
 let confidence = 0;
@@ -51,7 +51,7 @@ function draw() {
             textAlign(CENTER);
             text('ERROR: Material must be defined', 200, 350);
         }
-      } else if (scene = 'categorised') {
+      } else if (scene == 'categorised') {
         categorised();
       } else if (scene == 'testing') {
         testing();
@@ -68,7 +68,7 @@ function handleFile(file) {
   
     // turn it into an image
     
-    img = createImg(file.data, '');
+    img = createImg(file.data, 'Unavailable image. Please upload something else.');
     img.size(imgSize, imgSize);
     img.hide();
     console.log(img);
@@ -235,8 +235,8 @@ function mousePressed() {
          
             addExample(result);
 
-            // nn.normalizeData();
-            // nn.train({epochs: 50}, finishedTraining)
+            nn.normalizeData();
+            nn.train({epochs: 50}, finishedTraining)
         } 
 
         // If mouse goes to "NO" button
