@@ -1,8 +1,10 @@
 let img;
 let data = [];
 
+let trainable = false;
+
 let arrowY = 375;
-let imgSize = 80;
+let imgSize = 100;
 let inputText = '';
 let result = '';
 let confidence = 0;
@@ -37,13 +39,13 @@ function setup() {
 }
   
 function draw() {
-      if (scene == 'introduction') {
-          if (!firstTrained) {
+    if (scene == 'introduction') {
+        if (!firstTrained) {
             introduction();
-          } else {
+        } else {
             trained();
-          }
-      } else if (scene == 'imageUploaded') {
+        }
+    } else if (scene == 'imageUploaded') {
         imageUploaded();
         if (inputError) {
             fill(255, 0, 0);
@@ -51,11 +53,14 @@ function draw() {
             textAlign(CENTER);
             text('ERROR: Material must be defined', 200, 350);
         }
-      } else if (scene == 'categorised') {
+    } else if (scene == 'categorised') {
         categorised();
-      } else if (scene == 'testing') {
+    } else if (scene == 'testing') {
         testing();
-      }
+    }
+    if (data.find(item => item.target == "fabric") != undefined && data.find(item => item.target == "metal") != undefined && data.find(item => item.target == "paper") != undefined && data.find(item => item.target == "plastic") != undefined && data.find(item => item.target == "wood") != undefined) {
+        trainable = true; 
+    }
     
 }
   
@@ -149,11 +154,13 @@ function categorised() {
     textSize(20);
     text('Keep uploading files until you have', 200, 180);
     text('at least two categories.', 200, 210);
-    fill(150);
-    if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
-        if (data.length >= 5) {
-            fill(241, 164, 68);
+    if (trainable) {
+        fill(241, 164, 68);
+        if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30))) {
+           fill(251, 211, 1);
         }
+    } else {
+        fill(150);
     }
     text('TRAIN!', 200, 250);
     
@@ -232,7 +239,7 @@ function mousePressed() {
         }
     } else if (scene == 'categorised') {
         // If mouse goes to "Train!" button and the data array has at least 5 images
-        if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30)) && (data.length >= 5)) {
+        if (((mouseX < 165 + 70) && (mouseX > 165)) && ((mouseY > 225) && (mouseY < 225 + 30)) && trainable) {
             for (let i = 0; i < data.length; i ++) {
                 nn.addData({image: data[i].image}, {label: data[i].target});
             }
@@ -262,7 +269,7 @@ function mousePressed() {
 }
 
 function textInput(){
-    inputText = this.value();
+    inputText = this.value().toLowerCase();
     console.log(inputText);
 }
 
